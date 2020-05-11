@@ -1,0 +1,46 @@
+reset;
+model NLP.mod;
+include initial_guess0.INIVAL;
+option solver ipopt;
+options ipopt_options "max_iter=100";
+solve;
+
+shell ("del " & ("gap_feasibility.txt"));
+printf "%5.3f;", sum{i in {2..Nfe}}((x[i] - x[i-1] - hi * v[i] * cos(theta[i]))^2 + (y[i] - y[i-1] - hi * v[i] * sin(theta[i]))^2 + (v[i] - v[i-1] - hi * a[i])^2 + (theta[i] - theta[i-1] - hi * tan(phy[i]) * v[i] / L_wheelbase)^2 + (phy[i] - phy[i-1] - hi * w[i])^2 + (xf[i] - x[i] - Lfc * cos(theta[i]))^2 + (yf[i] - y[i] - Lfc * sin(theta[i]))^2 + (xr[i] - x[i] - Lrc * cos(theta[i]))^2 + (yr[i] - y[i] - Lrc * sin(theta[i]))^2)>>("gap_feasibility.txt");
+close ("gap_feasibility.txt");
+
+shell ("del " & ("opti_flag.txt"));
+if match (solve_message, "Optimal") > 0 then {
+	printf "1">>("opti_flag.txt");
+} else{
+	printf "0">>("opti_flag.txt");
+}
+close ("opti_flag.txt");
+
+shell ("del " & ("x.txt"));
+shell ("del " & ("y.txt"));
+shell ("del " & ("theta.txt"));
+for {i in I} {
+	printf "%5.3f;", x[i]>>("x.txt");
+	printf "%5.3f;", y[i]>>("y.txt");
+	printf "%5.3f;", theta[i]>>("theta.txt");
+}
+close ("x.txt");
+close ("y.txt");
+close ("theta.txt");
+
+shell ("del " & ("initial_guess1.INIVAL"));
+for {i in I} {
+	printf "let x[%d]:= %5.3f; \n", i, x[i]>>("initial_guess1.INIVAL");
+	printf "let y[%d]:= %5.3f; \n", i, y[i]>>("initial_guess1.INIVAL");
+	printf "let theta[%d]:= %5.3f; \n", i, theta[i]>>("initial_guess1.INIVAL");
+	printf "let v[%d]:= %5.3f; \n", i, v[i]>>("initial_guess1.INIVAL");
+	printf "let a[%d]:= %5.3f; \n", i, a[i]>>("initial_guess1.INIVAL");
+	printf "let phy[%d]:= %5.3f; \n", i, phy[i]>>("initial_guess1.INIVAL");		
+	printf "let w[%d]:= %5.3f; \n", i, w[i]>>("initial_guess1.INIVAL");
+	printf "let xf[%d]:= %5.3f; \n", i, xf[i]>>("initial_guess1.INIVAL");
+	printf "let yf[%d]:= %5.3f; \n", i, yf[i]>>("initial_guess1.INIVAL");
+	printf "let xr[%d]:= %5.3f; \n", i, xr[i]>>("initial_guess1.INIVAL");
+	printf "let yr[%d]:= %5.3f; \n", i, yr[i]>>("initial_guess1.INIVAL");
+}
+close ("initial_guess1.INIVAL");

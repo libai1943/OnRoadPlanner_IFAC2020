@@ -1,0 +1,14 @@
+reset;
+model NLP2.mod;
+include initial_guess1.INIVAL;
+option solver ipopt;
+options ipopt_options "max_iter=100";
+solve;
+
+shell ("del " & ("opti_flag.txt"));
+if match (solve_message, "Optimal") > 0 then {
+	printf "1">>("opti_flag.txt");
+} else{
+	printf "0">>("opti_flag.txt");
+}
+close ("opti_flag.txt");
